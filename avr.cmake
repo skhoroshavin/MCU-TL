@@ -1,5 +1,6 @@
-set(MCU_FAMILY tiny)
-set(MCU_TYPE   2313)
+set(MCU_FAMILY mega)
+set(MCU_TYPE    328)
+set(MCU_F_MHZ    16)
 
 set(CMAKE_SYSTEM_NAME Generic)
 
@@ -11,6 +12,7 @@ set(CMAKE_CXX_FLAGS -mmcu=at${MCU_FAMILY}${MCU_TYPE})
 
 string(TOUPPER ${MCU_TYPE} MCU_TYPE)
 add_definitions( -D__AVR_AT${MCU_FAMILY}${MCU_TYPE}__ )
+add_definitions( -DF_CPU=${MCU_F_MHZ}000000 )
 
 set(CMAKE_FIND_ROOT_PATH /usr/avr-gcc)
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
