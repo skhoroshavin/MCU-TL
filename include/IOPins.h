@@ -19,6 +19,8 @@ public:
 	inline static void set() { Port::set( mask ); }
 	inline static void clear() { Port::clear( mask ); }
 	inline static void toggle() { Port::toggle( mask ); }
+
+	inline static bool read() { return Port::read() & mask; }
 };
 
 }
