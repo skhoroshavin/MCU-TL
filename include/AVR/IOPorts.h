@@ -2,7 +2,6 @@
 #pragma once
 
 #include <avr/io.h>
-#include "IOPins.h"
 
 #define MAKE_AVR_PORT(Name) \
 	class Port##Name \

@@ -11,6 +11,7 @@ set(CMAKE_C_FLAGS -mmcu=at${MCU_FAMILY}${MCU_TYPE})
 set(CMAKE_CXX_FLAGS -mmcu=at${MCU_FAMILY}${MCU_TYPE})
 
 string(TOUPPER ${MCU_TYPE} MCU_TYPE)
+add_definitions( -D__AVR__ )
 add_definitions( -D__AVR_AT${MCU_FAMILY}${MCU_TYPE}__ )
 add_definitions( -DF_CPU=${MCU_F_MHZ}000000 )
 
