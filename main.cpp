@@ -11,13 +11,18 @@
 #include "mcucpp/pinlist.h"
 */
 
+using namespace gpio;
+using namespace arduino;
+
+typedef PinList<D10,D11,D12,D13> SPI;
+
 int main()
 {
-	gpio::PortB::setDirection( 0xff );
+	SPI::setOutput( 0xff );
 
 	while(1)
 	{
-		arduino::D13::toggle();
+		SPI::toggle( 0xff );
 		_delay_ms( 1000 );
 	}
 	return 0;

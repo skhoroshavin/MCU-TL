@@ -89,7 +89,14 @@ namespace gpio
 		template<class Ports,class Pins> struct PortIterator;
 		template<class Pins> struct PortIterator<meta::List<>,Pins>
 		{
+			inline static void setDir( uint8_t data ) { }
+			inline static void setOutput( uint8_t data ) { }
+			inline static void setInput( uint8_t data ) { }
+
 			inline static void write( uint8_t data ) { }
+			inline static void set( uint8_t data ) { }
+			inline static void clear( uint8_t data ) { }
+			inline static void toggle( uint8_t data ) { }
 		};
 		template<class Port,class... Tail,class Pins> struct PortIterator<meta::List<Port,Tail...>,Pins>
 		{
@@ -97,6 +104,27 @@ namespace gpio
 			template<typename Pin> struct PortHasPin { static const bool value = meta::IsEqual<Port,typename Pin::type::port>::value; };
 			typedef typename meta::Filter<PortHasPin,Pins>::result pins;
 			static const uint8_t mask = GetPortMask<pins>::value;
+
+			// Set direction
+			inline static void setDir( uint8_t data )
+			{
+				Port::maskedSetDir( mask, PinIterator<pins>::convert( data ) );
+				PortIterator<meta::List<Tail...>,Pins>::setDir( data );
+			}
+
+			// Set output
+			inline static void setOutput( uint8_t data )
+			{
+				Port::setOutput( PinIterator<pins>::convert( data ) );
+				PortIterator<meta::List<Tail...>,Pins>::setOutput( data );
+			}
+
+			// Set input
+			inline static void setInput( uint8_t data )
+			{
+				Port::setInput( PinIterator<pins>::convert( data ) );
+				PortIterator<meta::List<Tail...>,Pins>::setInput( data );
+			}
 
 			// Write
 			inline static void write( uint8_t data )
@@ -118,6 +146,13 @@ namespace gpio
 				Port::clear( PinIterator<pins>::convert( data ) );
 				PortIterator<meta::List<Tail...>,Pins>::clear( data );
 			}
+
+			// Toggle
+			inline static void toggle( uint8_t data )
+			{
+				Port::toggle( PinIterator<pins>::convert( data ) );
+				PortIterator<meta::List<Tail...>,Pins>::clear( data );
+			}
 		};
 	}
 
@@ -137,11 +172,14 @@ namespace gpio
 		>::result ports;
 
 	public:
+		inline static void setDir( uint8_t data )    { internal::PortIterator<ports,pins>::setDir( data );    }
+		inline static void setOutput( uint8_t data ) { internal::PortIterator<ports,pins>::setOutput( data ); }
+		inline static void setInput( uint8_t data )  { internal::PortIterator<ports,pins>::setInput( data );  }
 
-		inline static void write( uint8_t data )
-		{
-			internal::PortIterator<ports,pins>::write( data );
-		}
+		inline static void write( uint8_t data )  { internal::PortIterator<ports,pins>::write( data ); }
+		inline static void set( uint8_t data )    { internal::PortIterator<ports,pins>::set( data ); }
+		inline static void clear( uint8_t data )  { internal::PortIterator<ports,pins>::clear( data ); }
+		inline static void toggle( uint8_t data ) { internal::PortIterator<ports,pins>::toggle( data ); }
 	};
 
 }

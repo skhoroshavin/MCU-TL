@@ -8,13 +8,18 @@
 	class Port##Name \
 	{ \
 	public: \
-		inline static void setDirection( uint8_t data )            { DDR##Name = data;  } \
-		inline static void write( uint8_t data )                   { PORT##Name = data; } \
-		inline static void set( uint8_t data )                     { PORT##Name |= data; } \
-		inline static void clear( uint8_t data )                   { PORT##Name &= ~data; } \
-		inline static void toggle( uint8_t data )                  { PIN##Name = data; } \
-		inline static void maskedSet( uint8_t mask, uint8_t data ) { PORT##Name = (PORT##Name & ~mask) | data; } \
-		inline static uint8_t read()                               { return PIN##Name;  } \
+		inline static void setDir( uint8_t data )                     { DDR##Name = data;  } \
+		inline static void setOutput( uint8_t data )                  { DDR##Name |= data;  } \
+		inline static void setInput( uint8_t data )                   { DDR##Name &= ~data;  } \
+		inline static void maskedSetDir( uint8_t mask, uint8_t data ) { DDR##Name = (DDR##Name & ~mask) | data; } \
+	\
+		inline static void write( uint8_t data )                      { PORT##Name = data; } \
+		inline static void set( uint8_t data )                        { PORT##Name |= data; } \
+		inline static void clear( uint8_t data )                      { PORT##Name &= ~data; } \
+		inline static void toggle( uint8_t data )                     { PIN##Name = data; } \
+		inline static void maskedSet( uint8_t mask, uint8_t data )    { PORT##Name = (PORT##Name & ~mask) | data; } \
+	\
+		inline static uint8_t read()                                  { return PIN##Name;  } \
 	}; \
 	typedef Pin<Port##Name,0> Pin##Name##0; \
 	typedef Pin<Port##Name,1> Pin##Name##1; \
