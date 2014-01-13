@@ -8,11 +8,8 @@ template<unsigned int Size,typename DataType=unsigned char>
 class RingBuffer
 {
 	static_assert( !(Size & (Size-1)), "Ring buffer size must be power of two!" );
-	typedef typename meta::StaticIf<
-		(Size < 256),
-		uint8_t,
-		uint16_t
-	>::result IndexType;
+
+	typedef typename meta::SizeType<Size>::result IndexType;
 	static const IndexType mask = (Size - 1);
 
 	DataType _data[Size];
