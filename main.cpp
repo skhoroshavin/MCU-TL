@@ -1,21 +1,20 @@
 
 #include "RingBuffer.h"
 
-#include "IOPorts.h"
-#include "Arduino.h"
+#include "GPIO.h"
 #include "Usart.h"
 #include "PinList.h"
 
 #include <avr/interrupt.h>
 #include <util/delay.h>
 
-typedef Usart<16,16> uart;
+typedef serial::Usart<16,16> uart;
 ISR(USART_UDRE_vect) { uart::udreHandler(); }
 ISR(USART_RX_vect) { uart::rxHandler(); }
 
 int main()
 {
-	arduino::D13::setOutput();
+	gpio::D13::setOutput();
 
 	uart::setBaudRate<57600>();
 	uart::start();
@@ -38,7 +37,7 @@ int main()
 		while( uart::bytesReceived() )
 			uart::send( uart::recv() );
 
-		arduino::D13::toggle();
+		gpio::D13::toggle();
 		_delay_ms( 1000 );
 
 	}

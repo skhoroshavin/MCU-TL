@@ -1,7 +1,6 @@
 
 #pragma once
 
-#include "Platform.h"
 #include "MetaUtils.h"
 
 template<unsigned int Size,typename DataType=unsigned char>

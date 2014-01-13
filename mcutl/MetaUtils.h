@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "Platform.h"
+#include <stdint.h>
 
 namespace meta
 {
@@ -26,8 +26,14 @@ namespace meta
 
 	template<unsigned int Size> struct SizeType
 	{
-		typedef typename StaticIf<(Size <= 0xff),uint8_t,
-			typename StaticIf<(Size <= 0xffff),uint16_t,uint32_t>::result
+		typedef typename StaticIf<
+			(Size <= 0xff),
+			uint8_t,
+			typename StaticIf<
+				(Size <= 0xffff),
+				uint16_t,
+				uint32_t
+			>::result
 		>::result result;
 	};
 
