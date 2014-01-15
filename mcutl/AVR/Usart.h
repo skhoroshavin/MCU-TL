@@ -5,41 +5,54 @@
 #include <avr/interrupt.h>
 
 #include <BaseGPIO.h>
+#include <BaseStream.h>
 
-#define AVR_DEFINE_USART_REGS(ClassName,RegName) \
-	struct ClassName \
-	{ \
-		DEFINE_REGISTER(UbrrL,UBR##RegName##L,uint8_t) \
-		DEFINE_REGISTER(UbrrH,UBR##RegName##H,uint8_t) \
-		DEFINE_REGISTER(UcsrA,UCS##RegName##A,uint8_t) \
-		DEFINE_REGISTER(UcsrB,UCS##RegName##B,uint8_t) \
-		DEFINE_REGISTER(UcsrC,UCS##RegName##C,uint8_t) \
-		DEFINE_REGISTER(Udr,UD##RegName,uint8_t) \
-	};
+#define AVR_DEFINE_USART(Num) \
+	namespace avr { \
+		struct UsartReg##Num \
+		{ \
+			DEFINE_REGISTER(Udr,UDR##Num,uint8_t) \
+			DEFINE_REGISTER(UbrrL,UBRR##Num##L,uint8_t) \
+			DEFINE_REGISTER(UbrrH,UBRR##Num##H,uint8_t) \
+			DEFINE_REGISTER(UcsrA,UCSR##Num##A,uint8_t) \
+			DEFINE_REGISTER(UcsrB,UCSR##Num##B,uint8_t) \
+			DEFINE_REGISTER(UcsrC,UCSR##Num##C,uint8_t) \
+		}; \
+	} \
+	typedef avr::Usart<avr::UsartReg##Num> Usart##Num;
 
-namespace serial
+#if defined(UDR) && !defined(UDR0)
+#define UDR0   UDR
+#define UBRR0L UBRRL
+#define UBRR0H UBRRH
+
+#define UCSR0A UCSRA
+#define RXC0   RXC
+#define TXC0   TXC
+#define UDRE0  UDRE
+#define U2X0   U2X
+
+#define UCSR0B  UCSRB
+#define RXCIE0  RXCIE
+#define TXCIE0  TXCIE
+#define UDRIE0  UDRIE
+#define RXEN0   RXEN
+#define TXEN0   TXEN
+
+#define UCSR0C  UCSRC
+#define USBS0   USBS
+#define UCSZ01  UCSZ1
+#define UCSZ00  UCSZ0
+
+#endif // UDR
+
+namespace stream
 {
 	namespace avr
 	{
-#ifdef UDR
-		AVR_DEFINE_USART_REGS(Usart0,R)
-#else // UDR
 
-#ifdef UDR0
-		AVR_DEFINE_USART_REGS(Usart0,R0)
-#endif // UDR
-
-#ifdef UDR1
-		AVR_DEFINE_USART_REGS(Usart1,R1)
-#endif // UDR
-
-#endif // UDR
-	};
-
-	template<int TxSize,int RxSize,class Regs = avr::Usart0> class Usart
+	template<class Regs> class Usart
 	{
-		static RingBuffer<RxSize> _rx;
-		static RingBuffer<TxSize> _tx;
 	public:
 		template<uint32_t rate>
 		inline static void setBaudRate()
@@ -68,7 +81,7 @@ namespace serial
 		inline static void start()
 		{
 			Regs::UcsrC::write( (1 << USBS0) | (1 << UCSZ00) | (1 << UCSZ01) );	// 8 data bits, 2 stop bits
-			Regs::UcsrB::write( (1 << RXCIE0) | (1 << UDRIE0) | (1 << RXEN0) | (1 << TXEN0) ); // start interface and enable interrupts
+			Regs::UcsrB::write( (1 << RXCIE0) | (1 << RXEN0) | (1 << TXEN0) ); // start interface and enable interrupts
 		}
 
 		inline static void stop()
@@ -76,58 +89,47 @@ namespace serial
 			Regs::UcsrB::write( 0 );
 			Regs::UcsrC::write( 0 );
 			Regs::UcsrA::write( 0 );
-
-			_rx.clear();
-			_tx.clear();
 		}
 
-		static bool send( uint8_t c )
-		{
-			if( _tx.isFull() )
-				return false;
+		inline static bool sendReady() { return Regs::UcsrA::read() & (1 << UDRE0); }
+		inline static void send( char c ) { Regs::Udr::write( c ); }
+		inline static void setSendIRQ( bool enabled ) { if( enabled ) Regs::UcsrB::set( 1 << UDRIE0 ); else Regs::UcsrB::clear( 1 << UDRIE0 ); }
 
-			if( _tx.isEmpty() )
-			{
-				while( !(Regs::UcsrA::read() & (1 << UDRE0)) );
-
-				Regs::Udr::write( c );
-				Regs::UcsrB::set( 1 << UDRIE0 );
-			}
-			else
-				_tx.push_back( c );
-
-			return true;
-		}
-
-		template<typename Str>
-		static bool sendString( Str s )
-		{
-			while( char c = *s )
-			{
-				if( !send( c ) )
-					return false;
-				++s;
-			}
-			return true;
-		}
-
-		static uint8_t bytesReceived() { return _rx.count(); }
-		static uint8_t recv() { return _rx.pop_front(); }
-
-		static inline void udreHandler()
-		{
-			if( _tx.isEmpty() ) Regs::UcsrB::clear( 1 << UDRIE0 );
-			else Regs::Udr::write( _tx.pop_front() );
-		}
-
-		static inline void rxHandler()
-		{
-			uint8_t c = Regs::Udr::read();
-			if( !_rx.isFull() )
-				_rx.push_back( c );
-		}
+		inline static int  recvAvailable() { return (bool)(Regs::UcsrA::read() & (1 << RXC0)); }
+		inline static char recv() { return Regs::Udr::read(); }
 	};
 
-	template<int TxSize,int RxSize,class Regs> RingBuffer<RxSize> Usart<TxSize,RxSize,Regs>::_rx;
-	template<int TxSize,int RxSize,class Regs> RingBuffer<TxSize> Usart<TxSize,RxSize,Regs>::_tx;
+	}
+
+#ifdef UDR0
+AVR_DEFINE_USART(0)
+
+#ifdef USART_RX_vect
+#define IRQ_USART0_RECV ISR(USART_RX_vect)
+#define IRQ_USART0_SEND ISR(USART_UDRE_vect)
+#else // USART_RX_vect
+#define IRQ_USART0_RECV ISR(USART0_RX_vect)
+#define IRQ_USART0_SEND ISR(USART0_UDRE_vect)
+#endif // USART_RX_vect
+
+#endif // UDR0
+
+#ifdef UDR1
+AVR_DEFINE_USART(1)
+#define IRQ_USART1_RECV ISR(USART1_RX_vect)
+#define IRQ_USART1_SEND ISR(USART1_UDRE_vect)
+#endif // UDR1
+
+#ifdef UDR2
+AVR_DEFINE_USART(2)
+#define IRQ_USART2_RECV ISR(USART2_RX_vect)
+#define IRQ_USART2_SEND ISR(USART2_UDRE_vect)
+#endif // UDR2
+
+#ifdef UDR3
+AVR_DEFINE_USART(3)
+#define IRQ_USART3_RECV ISR(USART3_RX_vect)
+#define IRQ_USART3_SEND ISR(USART3_UDRE_vect)
+#endif // UDR3
+
 }

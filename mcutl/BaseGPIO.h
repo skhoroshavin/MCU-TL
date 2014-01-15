@@ -10,7 +10,6 @@
 		inline static void toggle( DataType data ) { RegName ^= data; } \
 		inline static void maskedSet( DataType mask, DataType data ) { RegName = (RegName & ~mask) | data; } \
 		inline static DataType read() { return RegName; } \
-		template<uint8_t Bit> inline static bool isSet() { return RegName & (1 << Bit); } \
 	};
 
 namespace gpio

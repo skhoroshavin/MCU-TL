@@ -7,13 +7,18 @@
 
 #include <util/delay.h>
 
-typedef serial::Usart<16,16> uart;
-ISR(USART_UDRE_vect) { uart::udreHandler(); }
-ISR(USART_RX_vect)
+typedef stream::BufferedStream<stream::Usart0> uart;
+
+IRQ_USART0_RECV
 {
 	unsigned char c = UDR0;
 	uart::send( c );
-	//uart::rxHandler();
+	//uart::recvHandler();
+}
+
+IRQ_USART0_SEND
+{
+	uart::sendHandler();
 }
 
 const char FLASH_STORAGE pHello[] = "Hello AVR!\r\n";
