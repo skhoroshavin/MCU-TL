@@ -1,6 +1,6 @@
 project(AVRTest)
 cmake_minimum_required(VERSION 2.8)
-add_definitions(-Os  -std=c++11)
+add_definitions(-Os -std=c++11)
 
 include_directories(mcutl mcutl/AVR)
 

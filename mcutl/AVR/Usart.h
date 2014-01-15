@@ -99,6 +99,18 @@ namespace serial
 			return true;
 		}
 
+		template<typename Str>
+		static bool sendString( Str s )
+		{
+			while( char c = *s )
+			{
+				if( !send( c ) )
+					return false;
+				++s;
+			}
+			return true;
+		}
+
 		static uint8_t bytesReceived() { return _rx.count(); }
 		static uint8_t recv() { return _rx.pop_front(); }
 
