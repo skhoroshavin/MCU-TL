@@ -93,7 +93,7 @@ namespace stream
 
 		inline static bool sendReady() { return Regs::UcsrA::read() & (1 << UDRE0); }
 		inline static void send( char c ) { Regs::Udr::write( c ); }
-		inline static void setSendIRQ( bool enabled ) { if( enabled ) Regs::UcsrB::set( 1 << UDRIE0 ); else Regs::UcsrB::clear( 1 << UDRIE0 ); }
+		inline static void enableSendISR( bool enabled ) { if( enabled ) Regs::UcsrB::set( 1 << UDRIE0 ); else Regs::UcsrB::clear( 1 << UDRIE0 ); }
 
 		inline static int  recvAvailable() { return (bool)(Regs::UcsrA::read() & (1 << RXC0)); }
 		inline static char recv() { return Regs::Udr::read(); }
@@ -104,32 +104,32 @@ namespace stream
 #ifdef UDR0
 AVR_DEFINE_USART(0)
 
-#ifdef USART_RX_vect
-#define IRQ_USART0_RECV ISR(USART_RX_vect)
-#define IRQ_USART0_SEND ISR(USART_UDRE_vect)
-#else // USART_RX_vect
-#define IRQ_USART0_RECV ISR(USART0_RX_vect)
-#define IRQ_USART0_SEND ISR(USART0_UDRE_vect)
-#endif // USART_RX_vect
+#ifdef USART_UDRE_vect
+#define ISR_USART0_RECV ISR(USART_RX_vect)
+#define ISR_USART0_SEND ISR(USART_UDRE_vect)
+#else // USART_UDRE_vect
+#define ISR_USART0_RECV ISR(USART0_RX_vect)
+#define ISR_USART0_SEND ISR(USART0_UDRE_vect)
+#endif // USART_UDRE_vect
 
 #endif // UDR0
 
 #ifdef UDR1
 AVR_DEFINE_USART(1)
-#define IRQ_USART1_RECV ISR(USART1_RX_vect)
-#define IRQ_USART1_SEND ISR(USART1_UDRE_vect)
+#define ISR_USART1_RECV ISR(USART1_RX_vect)
+#define ISR_USART1_SEND ISR(USART1_UDRE_vect)
 #endif // UDR1
 
 #ifdef UDR2
 AVR_DEFINE_USART(2)
-#define IRQ_USART2_RECV ISR(USART2_RX_vect)
-#define IRQ_USART2_SEND ISR(USART2_UDRE_vect)
+#define ISR_USART2_RECV ISR(USART2_RX_vect)
+#define ISR_USART2_SEND ISR(USART2_UDRE_vect)
 #endif // UDR2
 
 #ifdef UDR3
 AVR_DEFINE_USART(3)
-#define IRQ_USART3_RECV ISR(USART3_RX_vect)
-#define IRQ_USART3_SEND ISR(USART3_UDRE_vect)
+#define ISR_USART3_RECV ISR(USART3_RX_vect)
+#define ISR_USART3_SEND ISR(USART3_UDRE_vect)
 #endif // UDR3
 
 }

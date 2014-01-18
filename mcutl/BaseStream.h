@@ -10,7 +10,7 @@ namespace stream
 	public:
 		inline static bool sendReady() { return true; }
 		inline static void send( char c ) { }
-		inline static void setSendIRQ( bool enabled ) { }
+		inline static void setSendISR( bool enabled ) { }
 
 		inline static int  recvAvailable() { return 0; }
 		inline static char recv() { return 0; }
@@ -31,14 +31,14 @@ namespace stream
 			if( _tx.isEmpty() && Stream::sendReady() )
 			{
 				Stream::send( c );
-				Stream::setSendIRQ( true );
+				Stream::enableSendISR( true );
 			}
 			else
 				_tx.push_back( c );
 		}
 		static inline void sendHandler()
 		{
-			if( _tx.isEmpty() ) Stream::setSendIRQ( false );
+			if( _tx.isEmpty() ) Stream::enableSendISR( false );
 			else Stream::send( _tx.pop_front() );
 		}
 

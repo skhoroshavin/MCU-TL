@@ -1,6 +1,4 @@
 
-#include "RingBuffer.h"
-
 #include "GPIO.h"
 #include "Usart.h"
 #include "Flash.h"
@@ -9,23 +7,40 @@
 
 typedef stream::BufferedStream<stream::Usart0> uart;
 
-IRQ_USART0_RECV
+ISR_USART0_RECV
 {
 	unsigned char c = UDR0;
 	uart::send( c );
 	//uart::recvHandler();
 }
 
-IRQ_USART0_SEND
+ISR_USART0_SEND
 {
 	uart::sendHandler();
+}
+
+const uint8_t max_wait = 61;
+uint8_t wait = max_wait;
+
+ISR(TIMER0_OVF_vect)
+{
+	wait--;
+	if( !wait )
+	{
+		gpio::PinB5::toggle();
+		wait = max_wait;
+	}
 }
 
 const char FLASH_STORAGE pHello[] = "Hello AVR!\r\n";
 
 int main()
 {
-	gpio::D13::setOutput();
+	TCCR0A = 0;
+	TCCR0B = 0b101;
+	TIMSK0 = 1;
+
+	gpio::PinB5::setOutput();
 
 	uart::setBaudRate<57600>();
 	uart::start();
@@ -33,11 +48,6 @@ int main()
 
 	uart::sendString( fromFlash(pHello) );
 
-	while(1)
-	{
-		gpio::D13::toggle();
-		_delay_ms( 1000 );
-
-	}
+	while(1);
 	return 0;
 }
