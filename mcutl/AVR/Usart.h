@@ -11,12 +11,12 @@
 	namespace avr { \
 		struct UsartReg##Num \
 		{ \
-			DEFINE_REGISTER(Udr,UDR##Num,uint8_t) \
-			DEFINE_REGISTER(UbrrL,UBRR##Num##L,uint8_t) \
-			DEFINE_REGISTER(UbrrH,UBRR##Num##H,uint8_t) \
-			DEFINE_REGISTER(UcsrA,UCSR##Num##A,uint8_t) \
-			DEFINE_REGISTER(UcsrB,UCSR##Num##B,uint8_t) \
-			DEFINE_REGISTER(UcsrC,UCSR##Num##C,uint8_t) \
+			DEFINE_IO_REGISTER(Udr,UDR##Num,uint8_t) \
+			DEFINE_IO_REGISTER(UbrrL,UBRR##Num##L,uint8_t) \
+			DEFINE_IO_REGISTER(UbrrH,UBRR##Num##H,uint8_t) \
+			DEFINE_IO_REGISTER(UcsrA,UCSR##Num##A,uint8_t) \
+			DEFINE_IO_REGISTER(UcsrB,UCSR##Num##B,uint8_t) \
+			DEFINE_IO_REGISTER(UcsrC,UCSR##Num##C,uint8_t) \
 		}; \
 	} \
 	typedef avr::Usart<avr::UsartReg##Num> Usart##Num;

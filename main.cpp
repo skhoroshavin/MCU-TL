@@ -5,16 +5,16 @@
 
 struct LedOn;
 struct LedOff;
-
-typedef Dispatcher<4,
+typedef SoftRegister<uint8_t> TaskFlags;
+typedef StaticDispatcher<TaskFlags,4,
 	LedOn,
 	LedOff
-> dispatcher;
+> Dispatcher;
 
 ISR_TIMER0_OVERFLOW
 {
 	timer::Timer0::set( 256 - F_CPU / 1000 / 64 );
-	dispatcher::timerHandler();
+	Dispatcher::timerHandler();
 }
 
 struct LedOn
@@ -22,7 +22,7 @@ struct LedOn
 	inline static void process()
 	{
 		gpio::PinB5::set();
-		dispatcher::setTimer<LedOff>( 1000 );
+		Dispatcher::setTimer<LedOff>( 1000 );
 	}
 };
 
@@ -31,16 +31,16 @@ struct LedOff
 	inline static void process()
 	{
 		gpio::PinB5::clear();
-		dispatcher::setTimer<LedOn>( 1000 );
+		Dispatcher::setTimer<LedOn>( 1000 );
 	}
 };
 
 int main()
 {
-	dispatcher::init();
+	Dispatcher::init();
 
 	gpio::PinB5::setOutput();
-	dispatcher::setTask<LedOn>();
+	Dispatcher::setTask<LedOn>();
 
 	timer::Timer0::start( timer::TC_Div64 );
 	timer::Timer0::enableISR();
@@ -48,7 +48,7 @@ int main()
 	sei();
 
 	while(1)
-		dispatcher::process();
+		Dispatcher::process();
 
 	return 0;
 }

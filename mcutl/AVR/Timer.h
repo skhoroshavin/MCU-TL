@@ -44,9 +44,9 @@ namespace timer
 
 	class Timer0
 	{
-		DEFINE_REGISTER(TccrA,TCCR0A,uint8_t)
-		DEFINE_REGISTER(TccrB,TCCR0B,uint8_t)
-		DEFINE_REGISTER(Timsk,TIMSK0,uint8_t)
+		DEFINE_IO_REGISTER(TccrA,TCCR0A,uint8_t)
+		DEFINE_IO_REGISTER(TccrB,TCCR0B,uint8_t)
+		DEFINE_IO_REGISTER(Timsk,TIMSK0,uint8_t)
 		public:
 			inline static void setMode( TimerMode mode ) { TccrA::maskedSet( TM_MASK, mode ); }
 

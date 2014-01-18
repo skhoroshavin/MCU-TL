@@ -6,9 +6,9 @@
 
 #define AVR_DEFINE_PORT(Name) \
 	namespace avr { \
-		DEFINE_REGISTER(Port##Name,PORT##Name,uint8_t) \
-		DEFINE_REGISTER(Ddr##Name,DDR##Name,uint8_t) \
-		DEFINE_REGISTER(Pin##Name,PIN##Name,uint8_t) \
+		DEFINE_IO_REGISTER(Port##Name,PORT##Name,uint8_t) \
+		DEFINE_IO_REGISTER(Ddr##Name,DDR##Name,uint8_t) \
+		DEFINE_IO_REGISTER(Pin##Name,PIN##Name,uint8_t) \
 	} \
 	typedef avr::NativePort<avr::Port##Name,avr::Ddr##Name,avr::Pin##Name> Port##Name; \
 	typedef Pin<Port##Name,0> Pin##Name##0; \

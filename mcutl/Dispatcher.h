@@ -2,6 +2,7 @@
 #pragma once
 
 #include <MetaList.h>
+#include <Interrupts.h>
 
 namespace internal
 {
@@ -16,84 +17,99 @@ namespace internal
 		>::result result;
 	};
 
-	template<typename Flags,class List> struct TaskIterator;
-	template<typename Flags> struct TaskIterator<Flags,meta::List<>> { inline static void process( Flags& flags ) { } };
-	template<typename Flags,typename Head,typename... Tail> struct TaskIterator<Flags,meta::List<Head,Tail...>>
+	template<class Flags,class List> struct TaskIterator;
+	template<class Flags> struct TaskIterator<Flags,meta::List<>> { inline static void process() { } };
+	template<class Flags,typename Head,typename... Tail> struct TaskIterator<Flags,meta::List<Head,Tail...>>
 	{
-		inline static void process( Flags& flags )
+		inline static void process()
 		{
-			const Flags mask = 1 << Head::index;
-			if( flags & mask )
+			if( Flags::read() & (1 << Head::index) )
 			{
-				flags &= ~mask;
+				Flags::clear( 1 << Head::index );
 				Head::type::process();
 				return;
 			}
-			TaskIterator<Flags,meta::List<Tail...>>::process( flags );
+			TaskIterator<Flags,meta::List<Tail...>>::process();
 		}
 	};
 }
 
-template<unsigned TimerCount,class... Tasks>
-class Dispatcher
+
+template<unsigned TimerCount,class _Flags>
+class SoftTimer
+{
+	// Timers
+	struct Entry { uint16_t ticks; uint8_t flag; };
+	static Entry _timers[TimerCount];
+public:
+	typedef _Flags Flags;
+
+	static void init()
+	{
+		for( Entry& e : _timers )
+			e.ticks = 0;
+	}
+
+	inline static bool start( uint8_t flag, uint16_t ticks )
+	{
+		for( Entry& e : _timers )
+		{
+			if( !e.ticks )
+			{
+				e.ticks = ticks;
+				e.flag = flag;
+				return true;
+			}
+		}
+		return false;
+	}
+
+	static void timerHandler()
+	{
+		for( Entry& e : _timers )
+		{
+			if( !e.ticks ) continue;
+
+			--e.ticks;
+			if( !e.ticks )
+				Flags::set( 1 << e.flag );
+		}
+	}
+};
+
+template<unsigned TimerCount,class Flags>
+typename SoftTimer<TimerCount,Flags>::Entry SoftTimer<TimerCount,Flags>::_timers[TimerCount];
+
+
+template<class Flags,unsigned TimerCount,class... Tasks>
+class StaticDispatcher
 {
 	// Tasks
 	typedef typename meta::MakeIndexedList<Tasks...>::result TaskList;
-	static const unsigned taskCount = TaskList::size;
-	typedef typename meta::FlagsType<taskCount>::result TaskFlags;
-	static TaskFlags _flags;
 
-	// Timers
-	struct SoftTimer { uint16_t ticks; uint8_t task; };
-	static SoftTimer _timers[TimerCount];
+	// Timer
+	typedef SoftTimer<TimerCount,Flags> Timer;
 
 public:
-	static void init()
-	{
-		for( SoftTimer& timer : _timers )
-			timer.ticks = 0;
-	}
+	inline static void init() { Timer::init(); }
+	inline static void timerHandler() { Timer::timerHandler(); }
 
 	template<typename Task>
 	inline static void setTask()
 	{
 		typedef typename internal::FindTask<Task,TaskList>::result TaskItem;
-		_flags |= (1 << TaskItem::index);
+		Flags::set( 1 << TaskItem::index );
 	}
 
 	template<typename Task>
-	inline static void setTimer( uint16_t delay )
+	inline static void setTimer( uint16_t ticks )
 	{
 		typedef typename internal::FindTask<Task,TaskList>::result TaskItem;
-		for( SoftTimer& timer : _timers )
-		{
-			if( !timer.ticks )
-			{
-				timer.ticks = delay;
-				timer.task = TaskItem::index;
-				return;
-			}
-		}
-		// TODO: Fail!!!
-	}
-
-	static void timerHandler()
-	{
-		for( SoftTimer& timer : _timers )
-		{
-			if( !timer.ticks ) continue;
-
-			--timer.ticks;
-			if( !timer.ticks )
-				_flags |= (1 << timer.task);
-		}
+		Timer::start( TaskItem::index, ticks );
 	}
 
 	static void process()
 	{
-		internal::TaskIterator<TaskFlags,TaskList>::process( _flags );
+		internal::TaskIterator<Flags,TaskList>::process();
 	}
 };
-
-template<unsigned TimerCount,class... Tasks> typename Dispatcher<TimerCount,Tasks...>::TaskFlags Dispatcher<TimerCount,Tasks...>::_flags = 0;
-template<unsigned TimerCount,class... Tasks> typename Dispatcher<TimerCount,Tasks...>::SoftTimer Dispatcher<TimerCount,Tasks...>::_timers[TimerCount];
