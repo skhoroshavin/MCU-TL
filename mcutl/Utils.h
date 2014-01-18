@@ -11,4 +11,3 @@
 		inline static void maskedSet( DataType mask, DataType data ) { RegName = (RegName & ~mask) | data; } \
 		inline static DataType read() { return RegName; } \
 	};
-

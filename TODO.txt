@@ -8,6 +8,7 @@ Timers
 General
 	- Dispatcher
 	- Formatted output
+	- Debug output
 	- Command interface
 
 Drivers

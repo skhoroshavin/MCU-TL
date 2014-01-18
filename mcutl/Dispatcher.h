@@ -62,7 +62,7 @@ public:
 	}
 
 	template<typename Task>
-	inline static void setDelayedTask( uint16_t delay )
+	inline static void setTimer( uint16_t delay )
 	{
 		typedef typename internal::FindTask<Task,TaskList>::result TaskItem;
 		for( SoftTimer& timer : _timers )

@@ -25,5 +25,5 @@ public:
 
 	inline void clear() { _readCount = _writeCount = 0; }
 	inline void push_back( DataType value ) { _data[_writeCount++ & mask] = value; }
-	inline uint8_t pop_front() { return _data[_readCount++ & mask]; }
+	inline DataType pop_front() { return _data[_readCount++ & mask]; }
 };

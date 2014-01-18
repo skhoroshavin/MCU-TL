@@ -3,23 +3,26 @@
 #include "Timer.h"
 #include "Dispatcher.h"
 
-const uint8_t period = F_CPU / 256 / 256;
-
 struct LedOn;
 struct LedOff;
 
-typedef Dispatcher<
-	1,
+typedef Dispatcher<4,
 	LedOn,
 	LedOff
 > dispatcher;
+
+ISR_TIMER0_OVERFLOW
+{
+	timer::Timer0::set( 256 - F_CPU / 1000 / 64 );
+	dispatcher::timerHandler();
+}
 
 struct LedOn
 {
 	inline static void process()
 	{
 		gpio::PinB5::set();
-		dispatcher::setDelayedTask<LedOff>( period );
+		dispatcher::setTimer<LedOff>( 1000 );
 	}
 };
 
@@ -28,13 +31,9 @@ struct LedOff
 	inline static void process()
 	{
 		gpio::PinB5::clear();
-		dispatcher::setDelayedTask<LedOn>( period );
+		dispatcher::setTimer<LedOn>( 1000 );
 	}
 };
-
-typedef timer::Timer0 tickTimer;
-
-ISR_TIMER0_OVERFLOW { dispatcher::timerHandler(); }
 
 int main()
 {
@@ -43,8 +42,8 @@ int main()
 	gpio::PinB5::setOutput();
 	dispatcher::setTask<LedOn>();
 
-	tickTimer::start( timer::TC_Div256 );
-	tickTimer::enableISR();
+	timer::Timer0::start( timer::TC_Div64 );
+	timer::Timer0::enableISR();
 
 	sei();
 

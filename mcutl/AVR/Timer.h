@@ -53,8 +53,8 @@ namespace timer
 		inline static void start( TimerClock clock ) { TccrB::maskedSet( TC_MASK, clock ); }
 		inline static void stop() { TccrB::clear( TC_MASK ); }
 
-		inline static uint8_t counter() { return TCNT0; }
-		inline static void setCounter( uint8_t value ) { TCNT0 = value; }
+		inline static uint8_t get() { return TCNT0; }
+		inline static void set( uint8_t value ) { TCNT0 = value; }
 		inline static void enableISR() { Timsk::set( 1 << TOV0 ); }
 		inline static void disableISR() { Timsk::clear( 1 << TOV0 ); }
 
