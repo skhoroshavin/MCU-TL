@@ -51,7 +51,6 @@ namespace stream
 				_rx.push_back( c );
 		}
 
-
 		template<typename Str>
 		static bool sendString( Str s )
 		{

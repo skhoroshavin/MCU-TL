@@ -1,28 +1,21 @@
 
 #include "GPIO.h"
+#include "Timer.h"
 #include "Usart.h"
 #include "Flash.h"
 
 #include <util/delay.h>
 
 typedef stream::BufferedStream<stream::Usart0> uart;
+typedef timer::Timer0 tickTimer;
 
-ISR_USART0_RECV
-{
-	unsigned char c = UDR0;
-	uart::send( c );
-	//uart::recvHandler();
-}
+ISR_USART0_RECV { uart::recvHandler(); }
+ISR_USART0_SEND { uart::sendHandler(); }
 
-ISR_USART0_SEND
-{
-	uart::sendHandler();
-}
-
-const uint8_t max_wait = 61;
+const uint8_t max_wait = F_CPU / 256 / 256;
 uint8_t wait = max_wait;
 
-ISR(TIMER0_OVF_vect)
+ISR_TIMER0_OVERFLOW
 {
 	wait--;
 	if( !wait )
@@ -36,9 +29,8 @@ const char FLASH_STORAGE pHello[] = "Hello AVR!\r\n";
 
 int main()
 {
-	TCCR0A = 0;
-	TCCR0B = 0b101;
-	TIMSK0 = 1;
+	tickTimer::start( timer::TC_Div256 );
+	tickTimer::enableISR();
 
 	gpio::PinB5::setOutput();
 
@@ -48,6 +40,10 @@ int main()
 
 	uart::sendString( fromFlash(pHello) );
 
-	while(1);
+	while(1)
+	{
+		while( uart::recvAvailable() )
+			uart::send( uart::recv() );
+	}
 	return 0;
 }
