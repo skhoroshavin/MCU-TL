@@ -35,23 +35,23 @@ namespace internal
 }
 
 
-template<unsigned TimerCount,class _Flags>
+template<class Flags,unsigned TimerCount = 4,typename TickType = uint16_t>
 class SoftTimer
 {
 	// Timers
-	struct Entry { uint16_t ticks; uint8_t flag; };
+	struct Entry { TickType ticks; uint8_t flag; };
 	static Entry _timers[TimerCount];
 public:
-	typedef _Flags Flags;
-
 	static void init()
 	{
 		for( Entry& e : _timers )
 			e.ticks = 0;
 	}
 
-	inline static bool start( uint8_t flag, uint16_t ticks )
+	inline static bool start( uint8_t flag, TickType ticks )
 	{
+		ISRLocker __locker;
+
 		for( Entry& e : _timers )
 		{
 			if( !e.ticks )
@@ -64,7 +64,7 @@ public:
 		return false;
 	}
 
-	static void timerHandler()
+	static void tick()
 	{
 		for( Entry& e : _timers )
 		{
@@ -77,22 +77,19 @@ public:
 	}
 };
 
-template<unsigned TimerCount,class Flags>
-typename SoftTimer<TimerCount,Flags>::Entry SoftTimer<TimerCount,Flags>::_timers[TimerCount];
+template<class Flags,unsigned TimerCount,typename TickType>
+typename SoftTimer<Flags,TimerCount,TickType>::Entry SoftTimer<Flags,TimerCount,TickType>::_timers[TimerCount];
 
 
-template<class Flags,unsigned TimerCount,class... Tasks>
+template<class TaskList,class Flags,unsigned TimerCount = 4,typename TickType = uint16_t>
 class StaticDispatcher
 {
-	// Tasks
-	typedef typename meta::MakeIndexedList<Tasks...>::result TaskList;
-
 	// Timer
-	typedef SoftTimer<TimerCount,Flags> Timer;
+	typedef SoftTimer<Flags,TimerCount,TickType> Timer;
 
 public:
 	inline static void init() { Timer::init(); }
-	inline static void timerHandler() { Timer::timerHandler(); }
+	inline static void timerHandler() { Timer::tick(); }
 
 	template<typename Task>
 	inline static void setTask()
@@ -102,7 +99,7 @@ public:
 	}
 
 	template<typename Task>
-	inline static void setTimer( uint16_t ticks )
+	inline static void setTimer( TickType ticks )
 	{
 		typedef typename internal::FindTask<Task,TaskList>::result TaskItem;
 		Timer::start( TaskItem::index, ticks );

@@ -3,15 +3,12 @@
 
 #include <avr/interrupt.h>
 
-namespace isr
-{
-	struct NullLocker { };
+struct NullLocker { };
 
-	class ISRLocker
-	{
-		uint8_t _sreg;
-	public:
-		inline ISRLocker() : _sreg(SREG) { cli(); }
-		inline ~ISRLocker() { SREG = _sreg; }
-	};
-}
+class ISRLocker
+{
+	uint8_t _sreg;
+public:
+	inline ISRLocker() : _sreg(SREG) { cli(); }
+	inline ~ISRLocker() { SREG = _sreg; }
+};

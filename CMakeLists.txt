@@ -12,6 +12,7 @@ set( SRC_LIST
 	mcutl/BaseStream.h
 	mcutl/Dispatcher.h
 	mcutl/Flash.h
+	mcutl/Interrupts.h
 	mcutl/MetaList.h
 	mcutl/MetaUtils.h
 	mcutl/PinList.h
