@@ -1,49 +1,55 @@
 
 #include "GPIO.h"
 #include "Timer.h"
-#include "Usart.h"
-#include "Flash.h"
+#include "Dispatcher.h"
 
-#include <util/delay.h>
+const uint8_t period = F_CPU / 256 / 256;
 
-typedef stream::BufferedStream<stream::Usart0> uart;
+struct LedOn;
+struct LedOff;
+
+typedef Dispatcher<
+	1,
+	LedOn,
+	LedOff
+> dispatcher;
+
+struct LedOn
+{
+	inline static void process()
+	{
+		gpio::PinB5::set();
+		dispatcher::setDelayedTask<LedOff>( period );
+	}
+};
+
+struct LedOff
+{
+	inline static void process()
+	{
+		gpio::PinB5::clear();
+		dispatcher::setDelayedTask<LedOn>( period );
+	}
+};
+
 typedef timer::Timer0 tickTimer;
 
-ISR_USART0_RECV { uart::recvHandler(); }
-ISR_USART0_SEND { uart::sendHandler(); }
-
-const uint8_t max_wait = F_CPU / 256 / 256;
-uint8_t wait = max_wait;
-
-ISR_TIMER0_OVERFLOW
-{
-	wait--;
-	if( !wait )
-	{
-		gpio::PinB5::toggle();
-		wait = max_wait;
-	}
-}
-
-const char FLASH_STORAGE pHello[] = "Hello AVR!\r\n";
+ISR_TIMER0_OVERFLOW { dispatcher::timerHandler(); }
 
 int main()
 {
+	dispatcher::init();
+
+	gpio::PinB5::setOutput();
+	dispatcher::setTask<LedOn>();
+
 	tickTimer::start( timer::TC_Div256 );
 	tickTimer::enableISR();
 
-	gpio::PinB5::setOutput();
-
-	uart::setBaudRate<57600>();
-	uart::start();
 	sei();
 
-	uart::sendString( fromFlash(pHello) );
-
 	while(1)
-	{
-		while( uart::recvAvailable() )
-			uart::send( uart::recv() );
-	}
+		dispatcher::process();
+
 	return 0;
 }
