@@ -1,24 +1,31 @@
 
 #pragma once
 
-#include <Utils.h>
+#include <Registers.h>
 
 namespace gpio
 {
 	/////////////////////////////////////////////////////////////////////
-	/// Null register
+	/// Base port
 	/////////////////////////////////////////////////////////////////////
 
-	template<typename DataType = unsigned char> struct NullRegister
+	template<typename DataType,class Dir,class Out,class In>
+	struct BasePort
 	{
-		inline static void write( DataType data ) { }
-		inline static void set( DataType data ) { }
-		inline static void clear( DataType data ) { }
-		inline static void maskedSet( DataType mask, DataType data ) { }
+		typedef DataType data_type;
 
-		inline static DataType read() { return 0; }
-		template<DataType Bit>
-		inline static bool isSet() { return false; }
+		inline static void setDir( DataType data )                     { Dir::write( data ); }
+		inline static void setOutput( DataType data )                  { Dir::set( data ); }
+		inline static void setInput( DataType data )                   { Dir::clear( data ); }
+		inline static void maskedSetDir( DataType mask, DataType data ) { Dir::maskedSet( mask, data ); }
+
+		inline static void write( DataType data )                   { Out::write( data ); }
+		inline static void set( DataType data )                     { Out::set( data ); }
+		inline static void clear( DataType data )                   { Out::clear( data ); }
+		inline static void toggle( DataType data )                  { Out::toggle( data ); }
+		inline static void maskedSet( DataType mask, DataType data ) { Out::maskedSet( mask, data ); }
+
+		inline static DataType read() { return In::read();  }
 	};
 
 	/////////////////////////////////////////////////////////////////////

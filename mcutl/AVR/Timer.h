@@ -4,7 +4,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
-#include <Utils.h>
+#include <Registers.h>
 
 namespace timer
 {

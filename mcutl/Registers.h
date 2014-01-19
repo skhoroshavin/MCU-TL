@@ -1,6 +1,20 @@
 
 #pragma once
 
+/////////////////////////////////////////////////////////////////////
+/// Null register
+/////////////////////////////////////////////////////////////////////
+
+template<typename DataType = unsigned char> struct NullRegister
+{
+	inline static void write( DataType data ) { } \
+	inline static void set( DataType data ) { } \
+	inline static void clear( DataType data ) { } \
+	inline static void toggle( DataType data ) { } \
+	inline static void maskedSet( DataType mask, DataType data ) { } \
+	inline static DataType read() { return 0; } \
+};
+
 /////////////////////////////////////////////////////////////////////////
 /// Software register
 /////////////////////////////////////////////////////////////////////////

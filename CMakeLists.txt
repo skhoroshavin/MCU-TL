@@ -16,8 +16,8 @@ set( SRC_LIST
 	mcutl/MetaList.h
 	mcutl/MetaUtils.h
 	mcutl/PinList.h
+	mcutl/Registers.h
 	mcutl/RingBuffer.h
-	mcutl/Utils.h
 	main.cpp
 )
 

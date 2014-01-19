@@ -4,7 +4,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
-#include <Utils.h>
+#include <Registers.h>
 #include <BaseStream.h>
 
 #define AVR_DEFINE_USART(Num) \
