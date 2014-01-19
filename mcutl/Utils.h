@@ -5,7 +5,7 @@
 /// Software register
 /////////////////////////////////////////////////////////////////////////
 
-template<typename DataType>
+template<typename Tag,typename DataType>
 class SoftRegister
 {
 	static DataType _data;
@@ -17,7 +17,7 @@ public:
 	inline static void maskedSet( DataType mask, DataType data ) { _data = (_data & ~mask) | data; } \
 	inline static DataType read() { return _data; } \
 };
-template<typename DataType> DataType SoftRegister<DataType>::_data = 0;
+template<typename Tag,typename DataType> DataType SoftRegister<Tag,DataType>::_data = 0;
 
 /////////////////////////////////////////////////////////////////////////
 /// MCU register

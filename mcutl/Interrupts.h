@@ -5,6 +5,8 @@
 
 struct NullLocker { };
 
+inline void enableISR() { sei(); }
+
 class ISRLocker
 {
 	uint8_t _sreg;

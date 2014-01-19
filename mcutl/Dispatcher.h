@@ -72,7 +72,7 @@ public:
 
 			--e.ticks;
 			if( !e.ticks )
-				Flags::set( 1 << e.flag );
+				Flags::set( e.flag );
 		}
 	}
 };
@@ -86,6 +86,12 @@ class StaticDispatcher
 {
 	// Timer
 	typedef SoftTimer<Flags,TimerCount,TickType> Timer;
+	static_assert( TaskList::size <= 8, "Static dispatcher cannot handle more than 8 tasks!" );
+
+	template<typename Task> inline static uint8_t taskFlag()
+	{
+		return 1 << internal::FindTask<Task,TaskList>::result::index;
+	}
 
 public:
 	inline static void init() { Timer::init(); }
@@ -94,15 +100,13 @@ public:
 	template<typename Task>
 	inline static void setTask()
 	{
-		typedef typename internal::FindTask<Task,TaskList>::result TaskItem;
-		Flags::set( 1 << TaskItem::index );
+		Flags::set( taskFlag<Task>() );
 	}
 
 	template<typename Task>
 	inline static void setTimer( TickType ticks )
 	{
-		typedef typename internal::FindTask<Task,TaskList>::result TaskItem;
-		Timer::start( TaskItem::index, ticks );
+		Timer::start( taskFlag<Task>(), ticks );
 	}
 
 	static void process()

@@ -7,8 +7,6 @@ struct LedOn;
 struct LedOff;
 typedef typename meta::MakeIndexedList<LedOn,LedOff>::result TaskList;
 
-//typedef SoftRegister<uint8_t> TaskFlags;
-//DEFINE_MCU_REGISTER(TaskFlags,r2,uint8_t)
 DEFINE_IO_REGISTER(TaskFlags,GPIOR0,uint8_t)
 typedef StaticDispatcher<TaskList,TaskFlags> Dispatcher;
 
@@ -46,7 +44,7 @@ int main()
 	timer::Timer0::start( timer::TC_Div64 );
 	timer::Timer0::enableISR();
 
-	sei();
+	enableISR();
 
 	while(1)
 		Dispatcher::process();
