@@ -56,31 +56,31 @@ namespace timer
 
 		inline static uint8_t get() { return TCNT0; }
 		inline static void set( uint8_t value ) { TCNT0 = value; }
-		inline static bool checkFlag() { return Tifr::read() & (1 << TOV0); }
-		inline static void clearFlag() { return Tifr::set( 1 << TOV0 ); }
-		inline static void enableISR() { Timsk::set( 1 << TOIE0 ); }
-		inline static void disableISR() { Timsk::clear( 1 << TOIE0 ); }
+		inline static bool checkFlag() { return Tifr::isBitSet(TOV0); }
+		inline static void clearFlag() { Tifr::setBit(TOV0); }
+		inline static void enableISR() { Timsk::setBit(TOIE0); }
+		inline static void disableISR() { Timsk::clearBit(TOIE0); }
 
 		struct CompareA
 		{
 			inline static uint8_t get() { return OCR0A; }
 			inline static void set( uint8_t value ) { OCR0A = value; }
 			inline static void setMode( CompareMode mode ) { TccrA::maskedSet( CM_MASK << 6, mode << 6 ); }
-			inline static bool checkFlag() { Tifr::read() & (1 << OCF0A);}
-			inline static void clearFlag() { Tifr::set(1 << OCF0A);}
-			inline static void enableISR() { Timsk::set( 1 << OCIE0A ); }
-			inline static void disableISR() { Timsk::clear( 1 << OCIE0A ); }
+			inline static bool checkFlag() { return Tifr::isBitSet(OCF0A); }
+			inline static void clearFlag() { Tifr::setBit(OCF0A); }
+			inline static void enableISR() { Timsk::setBit(OCIE0A); }
+			inline static void disableISR() { Timsk::clearBit(OCIE0A); }
 		};
 
 		struct CompareB
 		{
 			inline static uint8_t get() { return OCR0B; }
 			inline static void set( uint8_t value ) { OCR0B = value; }
-			inline static void setMode( CompareMode mode ) { TccrA::maskedSet( CM_MASK << 4, mode << 4 ); }
-			inline static bool checkFlag() { Tifr::read() & (1 << OCF0B);}
-			inline static void clearFlag() { Tifr::set(1 << OCF0B);}
-			inline static void enableISR() { Timsk::set( 1 << OCIE0B ); }
-			inline static void disableISR() { Timsk::clear( 1 << OCIE0B ); }
+			inline static void setMode( CompareMode mode ) { TccrB::maskedSet( CM_MASK << 6, mode << 6 ); }
+			inline static bool checkFlag() { return Tifr::isBitSet(OCF0B); }
+			inline static void clearFlag() { Tifr::setBit(OCF0B); }
+			inline static void enableISR() { Timsk::setBit(OCIE0B); }
+			inline static void disableISR() { Timsk::clearBit(OCIE0B); }
 		};
 	};
 

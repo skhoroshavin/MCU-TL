@@ -93,9 +93,9 @@ namespace stream
 
 		inline static bool sendReady() { return Regs::UcsrA::read() & (1 << UDRE0); }
 		inline static void send( char c ) { Regs::Udr::write( c ); }
-		inline static void enableSendISR( bool enabled ) { if( enabled ) Regs::UcsrB::set( 1 << UDRIE0 ); else Regs::UcsrB::clear( 1 << UDRIE0 ); }
+		inline static void enableSendISR( bool enabled ) { Regs::UcsrB::setBit( UDRIE0, enabled ); }
 
-		inline static int  recvAvailable() { return (bool)(Regs::UcsrA::read() & (1 << RXC0)); }
+		inline static int  recvAvailable() { return Regs::UcsrA::isBitSet(RXC0); }
 		inline static char recv() { return Regs::Udr::read(); }
 	};
 
