@@ -14,15 +14,15 @@ namespace gpio
 	{
 		typedef DataType data_type;
 
-		inline static void setDir( DataType data )                     { Dir::write( data ); }
-		inline static void setOutput( DataType data )                  { Dir::set( data ); }
-		inline static void setInput( DataType data )                   { Dir::clear( data ); }
+		inline static void setDir( DataType data )                      { Dir::write( data ); }
+		inline static void setOutput( DataType data )                   { Dir::set( data ); }
+		inline static void setInput( DataType data )                    { Dir::clear( data ); }
 		inline static void maskedSetDir( DataType mask, DataType data ) { Dir::maskedSet( mask, data ); }
 
-		inline static void write( DataType data )                   { Out::write( data ); }
-		inline static void set( DataType data )                     { Out::set( data ); }
-		inline static void clear( DataType data )                   { Out::clear( data ); }
-		inline static void toggle( DataType data )                  { Out::toggle( data ); }
+		inline static void write( DataType data )                    { Out::write( data ); }
+		inline static void set( DataType data )                      { Out::set( data ); }
+		inline static void clear( DataType data )                    { Out::clear( data ); }
+		inline static void toggle( DataType data )                   { Out::toggle( data ); }
 		inline static void maskedSet( DataType mask, DataType data ) { Out::maskedSet( mask, data ); }
 
 		inline static DataType read() { return In::read();  }
@@ -32,23 +32,12 @@ namespace gpio
 	/// Null port
 	/////////////////////////////////////////////////////////////////////
 
-	template<typename DataType = unsigned char> struct NullPort
-	{
-		typedef DataType data_type;
-
-		inline static void setDir( DataType data ) { }
-		inline static void setOutput( DataType data ) { }
-		inline static void setInput( DataType data ) { }
-		inline static void maskedSetDir( DataType mask, DataType data ) { }
-
-		inline static void write( DataType data ) { }
-		inline static void set( DataType data ) { }
-		inline static void clear( DataType data ) { }
-		inline static void toggle( DataType data ) { }
-		inline static void maskedSet( DataType mask, DataType data ) { }
-
-		inline static DataType read() { return 0; }
-	};
+	template<typename DataType = unsigned char> struct NullPort :
+			public BasePort<DataType,
+							NullRegister<DataType>,
+							NullRegister<DataType>,
+							NullRegister<DataType>
+			> { };
 
 	/////////////////////////////////////////////////////////////////////
 	/// Pin

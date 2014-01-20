@@ -46,23 +46,28 @@ namespace timer
 	{
 		DEFINE_IO_REGISTER(TccrA,TCCR0A,uint8_t)
 		DEFINE_IO_REGISTER(TccrB,TCCR0B,uint8_t)
+		DEFINE_IO_REGISTER(Tifr, TIFR0, uint8_t)
 		DEFINE_IO_REGISTER(Timsk,TIMSK0,uint8_t)
-		public:
-			inline static void setMode( TimerMode mode ) { TccrA::maskedSet( TM_MASK, mode ); }
+	public:
+		inline static void setMode( TimerMode mode ) { TccrA::maskedSet( TM_MASK, mode ); }
 
 		inline static void start( TimerClock clock ) { TccrB::maskedSet( TC_MASK, clock ); }
 		inline static void stop() { TccrB::clear( TC_MASK ); }
 
 		inline static uint8_t get() { return TCNT0; }
 		inline static void set( uint8_t value ) { TCNT0 = value; }
-		inline static void enableISR() { Timsk::set( 1 << TOV0 ); }
-		inline static void disableISR() { Timsk::clear( 1 << TOV0 ); }
+		inline static bool checkFlag() { return Tifr::read() & (1 << TOV0); }
+		inline static void clearFlag() { return Tifr::set( 1 << TOV0 ); }
+		inline static void enableISR() { Timsk::set( 1 << TOIE0 ); }
+		inline static void disableISR() { Timsk::clear( 1 << TOIE0 ); }
 
 		struct CompareA
 		{
 			inline static uint8_t get() { return OCR0A; }
 			inline static void set( uint8_t value ) { OCR0A = value; }
 			inline static void setMode( CompareMode mode ) { TccrA::maskedSet( CM_MASK << 6, mode << 6 ); }
+			inline static bool checkFlag() { Tifr::read() & (1 << OCF0A);}
+			inline static void clearFlag() { Tifr::set(1 << OCF0A);}
 			inline static void enableISR() { Timsk::set( 1 << OCIE0A ); }
 			inline static void disableISR() { Timsk::clear( 1 << OCIE0A ); }
 		};
@@ -72,6 +77,8 @@ namespace timer
 			inline static uint8_t get() { return OCR0B; }
 			inline static void set( uint8_t value ) { OCR0B = value; }
 			inline static void setMode( CompareMode mode ) { TccrA::maskedSet( CM_MASK << 4, mode << 4 ); }
+			inline static bool checkFlag() { Tifr::read() & (1 << OCF0B);}
+			inline static void clearFlag() { Tifr::set(1 << OCF0B);}
 			inline static void enableISR() { Timsk::set( 1 << OCIE0B ); }
 			inline static void disableISR() { Timsk::clear( 1 << OCIE0B ); }
 		};

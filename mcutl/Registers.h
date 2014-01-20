@@ -22,7 +22,7 @@ template<typename DataType = unsigned char> struct NullRegister
 template<typename Tag,typename DataType>
 class SoftRegister
 {
-	static DataType _data;
+	static volatile DataType _data;
 public:
 	inline static void write( DataType data ) { _data = data; } \
 	inline static void set( DataType data ) { _data |= data; } \
@@ -31,7 +31,7 @@ public:
 	inline static void maskedSet( DataType mask, DataType data ) { _data = (_data & ~mask) | data; } \
 	inline static DataType read() { return _data; } \
 };
-template<typename Tag,typename DataType> DataType SoftRegister<Tag,DataType>::_data = 0;
+template<typename Tag,typename DataType> volatile DataType SoftRegister<Tag,DataType>::_data = 0;
 
 /////////////////////////////////////////////////////////////////////////
 /// MCU register
