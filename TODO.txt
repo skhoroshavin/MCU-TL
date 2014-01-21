@@ -1,15 +1,8 @@
 
-Timers
-	- Simple 8 bit
-	- Simple 16 bit
-	- Fast 16 bit
-	- Async 8 bit
-
-General
-	- Dispatcher
-	- Formatted output
-	- Debug output
-	- Command interface
+- Lightweight FSM
+- Formatted output
+- Command interface
+- Refactoring
 
 Drivers
 	- SPI and SoftSPI
