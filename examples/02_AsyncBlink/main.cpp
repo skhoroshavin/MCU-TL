@@ -1,7 +1,7 @@
 
-#include "GPIO.h"
-#include "Timer.h"
-#include "Dispatcher.h"
+#include <mcutl/ports.h>
+#include <mcutl/timers.h>
+#include <mcutl/dispatcher.h>
 
 struct LedOn;
 struct LedOff;
@@ -12,7 +12,7 @@ typedef StaticDispatcher<TaskList,TaskFlags> Dispatcher;
 
 ISR_TIMER0_OVERFLOW
 {
-	timer::Timer0::set( 256 - F_CPU / 1000 / 64 );
+	Timer0::set( 256 - F_CPU / 1000 / 64 );
 	Dispatcher::timerHandler();
 }
 
@@ -20,7 +20,7 @@ struct LedOn
 {
 	inline static void process()
 	{
-		gpio::PinB5::set();
+		PinB5::set();
 		Dispatcher::setTimer<LedOff>( 1000 );
 	}
 };
@@ -29,7 +29,7 @@ struct LedOff
 {
 	inline static void process()
 	{
-		gpio::PinB5::clear();
+		PinB5::clear();
 		Dispatcher::setTimer<LedOn>( 1000 );
 	}
 };
@@ -38,11 +38,11 @@ int main()
 {
 	Dispatcher::init();
 
-	gpio::PinB5::setOutput();
+	PinB5::setOutput();
 	Dispatcher::setTask<LedOn>();
 
-	timer::Timer0::start( timer::TC_Div64 );
-	timer::Timer0::enableISR();
+	Timer0::start( timer::TC_Div64 );
+	Timer0::enableISR();
 
 	enableISR();
 

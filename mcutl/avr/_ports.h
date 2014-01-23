@@ -1,7 +1,6 @@
 
 #pragma once
 
-#include <BaseGPIO.h>
 #include <avr/io.h>
 
 #define AVR_DEFINE_PORT(Name) \
@@ -20,13 +19,11 @@
 	typedef Pin<Port##Name,6> Pin##Name##6; \
 	typedef Pin<Port##Name,7> Pin##Name##7;
 
-namespace gpio
+template<class Port,class Ddr,class Pin>
+struct AVRPort : public BasePort<uint8_t,Ddr,Port,Pin>
 {
-	template<class Port,class Ddr,class Pin>
-	struct AVRPort : public BasePort<uint8_t,Ddr,Port,Pin>
-	{
-		inline static void toggle( uint8_t data ) { Pin::write( data ); }
-	};
+	inline static void toggle( uint8_t data ) { Pin::write( data ); }
+};
 
 #ifdef PORTA
 	AVR_DEFINE_PORT(A)
@@ -79,4 +76,3 @@ namespace gpio
 	typedef PinB4 D12;
 	typedef PinB5 D13;
 #endif
-}
