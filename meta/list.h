@@ -22,8 +22,8 @@ namespace meta
 	// Prepend type to list
 	/////////////////////////////////////////////////////////////////////////
 
-	template<typename Type,class List> struct PushFront;
-	template<typename Type,typename... Tail> struct PushFront<Type,List<Tail...>>
+	template<typename Type,class List> struct Prepend;
+	template<typename Type,typename... Tail> struct Prepend<Type,List<Tail...>>
 	{
 		typedef List<Type,Tail...> result;
 	};
@@ -37,7 +37,7 @@ namespace meta
 	template<typename Head,typename... Tail> struct TakeFirst<List<Head,Tail...>,0> { typedef List<> result; };
 	template<typename Head,typename... Tail,uint8_t Num> struct TakeFirst<List<Head,Tail...>,Num>
 	{
-		typedef typename PushFront<
+		typedef typename Prepend<
 			Head,
 			typename TakeFirst<List<Tail...>,Num-1>::result
 		>::result result;
@@ -65,7 +65,7 @@ namespace meta
 	{
 		typedef typename Func<Head>::result head;
 		typedef typename Transform<Func,List<Tail...>>::result tail;
-		typedef typename PushFront<head,tail>::result result;
+		typedef typename Prepend<head,tail>::result result;
 	};
 
 	/////////////////////////////////////////////////////////////////////////
@@ -78,7 +78,7 @@ namespace meta
 	{
 		typedef typename Func<Head,I>::result head;
 		typedef typename TransformI<Func,List<Tail...>,I+1>::result tail;
-		typedef typename PushFront<head,tail>::result result;
+		typedef typename Prepend<head,tail>::result result;
 	};
 
 	/////////////////////////////////////////////////////////////////////////
@@ -92,7 +92,7 @@ namespace meta
 		typedef typename Filter<Func,List<Tail...>>::result tail;
 		typedef typename StaticIf<
 			Func<Head>::value,
-			typename PushFront<Head,tail>::result,
+			typename Prepend<Head,tail>::result,
 			tail
 		>::result result;
 	};
@@ -118,7 +118,7 @@ namespace meta
 		typedef typename Unique<
 			typename RemoveAll<Head,List<Tail...>>::result
 		>::result tail;
-		typedef typename PushFront<Head,tail>::result result;
+		typedef typename Prepend<Head,tail>::result result;
 	};
 
 	/////////////////////////////////////////////////////////////////////////
