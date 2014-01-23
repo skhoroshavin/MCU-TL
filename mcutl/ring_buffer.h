@@ -1,9 +1,9 @@
 
 #pragma once
 
-#include "MetaUtils.h"
+#include <meta/common.h>
 
-template<unsigned int Size,typename DataType=unsigned char>
+template<unsigned Size,typename DataType=unsigned char>
 class RingBuffer
 {
 	static_assert( !(Size & (Size-1)), "Ring buffer size must be power of two!" );

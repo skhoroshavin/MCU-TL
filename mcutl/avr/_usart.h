@@ -4,8 +4,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
-#include <Registers.h>
-#include <BaseStream.h>
+#include <mcutl/registers.h>
 
 #define AVR_DEFINE_USART(Num) \
 	namespace avr { \
@@ -19,7 +18,7 @@
 			DEFINE_IO_REGISTER(UcsrC,UCSR##Num##C,uint8_t) \
 		}; \
 	} \
-	typedef avr::Usart<avr::UsartReg##Num> Usart##Num;
+	typedef AVRUsart<avr::UsartReg##Num> Usart##Num;
 
 #if defined(UDR) && !defined(UDR0)
 #define UDR0   UDR
@@ -46,60 +45,53 @@
 
 #endif // UDR
 
-namespace stream
+template<class Regs> class AVRUsart
 {
-	namespace avr
+public:
+	template<uint32_t rate>
+	inline static void setBaudRate()
 	{
+		const uint16_t ubrr1x = (F_CPU/16/rate-1);	// 16
+		const uint16_t ubrr2x = (F_CPU/8/rate-1);	// 33
+		const uint32_t rate1x = (F_CPU/16/(ubrr1x+1));	// 58823
+		const uint32_t rate2x = (F_CPU/8/(ubrr2x+1));	// 58823
+		const uint32_t err1 = rate > rate1x ? (rate - rate1x) : (rate1x - rate);
+		const uint32_t err2 = rate > rate2x ? (rate - rate2x) : (rate2x - rate);
 
-	template<class Regs> class Usart
-	{
-	public:
-		template<uint32_t rate>
-		inline static void setBaudRate()
+		if( err2 < err1 )
 		{
-			const uint16_t ubrr1x = (F_CPU/16/rate-1);	// 16
-			const uint16_t ubrr2x = (F_CPU/8/rate-1);	// 33
-			const uint32_t rate1x = (F_CPU/16/(ubrr1x+1));	// 58823
-			const uint32_t rate2x = (F_CPU/8/(ubrr2x+1));	// 58823
-			const uint32_t err1 = rate > rate1x ? (rate - rate1x) : (rate1x - rate);
-			const uint32_t err2 = rate > rate2x ? (rate - rate2x) : (rate2x - rate);
-
-			if( err2 < err1 )
-			{
-				Regs::UcsrA::write( (1 << U2X0) );
-				Regs::UbrrH::write( (uint8_t)(ubrr2x >> 8) );
-				Regs::UbrrL::write( (uint8_t)ubrr2x );
-			}
-			else
-			{
-				Regs::UcsrA::write( 0 );
-				Regs::UbrrH::write( (uint8_t)(ubrr1x >> 8) );
-				Regs::UbrrL::write( (uint8_t)ubrr1x );
-			}
+			Regs::UcsrA::write( (1 << U2X0) );
+			Regs::UbrrH::write( (uint8_t)(ubrr2x >> 8) );
+			Regs::UbrrL::write( (uint8_t)ubrr2x );
 		}
-
-		inline static void start()
+		else
 		{
-			Regs::UcsrC::write( (1 << USBS0) | (1 << UCSZ00) | (1 << UCSZ01) );	// 8 data bits, 2 stop bits
-			Regs::UcsrB::write( (1 << RXCIE0) | (1 << RXEN0) | (1 << TXEN0) ); // start interface and enable interrupts
-		}
-
-		inline static void stop()
-		{
-			Regs::UcsrB::write( 0 );
-			Regs::UcsrC::write( 0 );
 			Regs::UcsrA::write( 0 );
+			Regs::UbrrH::write( (uint8_t)(ubrr1x >> 8) );
+			Regs::UbrrL::write( (uint8_t)ubrr1x );
 		}
-
-		inline static bool sendReady() { return Regs::UcsrA::read() & (1 << UDRE0); }
-		inline static void send( char c ) { Regs::Udr::write( c ); }
-		inline static void enableSendISR( bool enabled ) { Regs::UcsrB::setBit( UDRIE0, enabled ); }
-
-		inline static int  recvAvailable() { return Regs::UcsrA::isBitSet(RXC0); }
-		inline static char recv() { return Regs::Udr::read(); }
-	};
-
 	}
+
+	inline static void start()
+	{
+		Regs::UcsrC::write( (1 << USBS0) | (1 << UCSZ00) | (1 << UCSZ01) );	// 8 data bits, 2 stop bits
+		Regs::UcsrB::write( (1 << RXCIE0) | (1 << RXEN0) | (1 << TXEN0) ); // start interface and enable interrupts
+	}
+
+	inline static void stop()
+	{
+		Regs::UcsrB::write( 0 );
+		Regs::UcsrC::write( 0 );
+		Regs::UcsrA::write( 0 );
+	}
+
+	inline static bool sendReady() { return Regs::UcsrA::read() & (1 << UDRE0); }
+	inline static void send( char c ) { Regs::Udr::write( c ); }
+	inline static void enableSendISR( bool enabled ) { Regs::UcsrB::writeBit( UDRIE0, enabled ); }
+
+	inline static int  recvAvailable() { return Regs::UcsrA::isBitSet(RXC0); }
+	inline static char recv() { return Regs::Udr::read(); }
+};
 
 #ifdef UDR0
 AVR_DEFINE_USART(0)
@@ -131,5 +123,3 @@ AVR_DEFINE_USART(3)
 #define ISR_USART3_RECV ISR(USART3_RX_vect)
 #define ISR_USART3_SEND ISR(USART3_UDRE_vect)
 #endif // UDR3
-
-}
