@@ -24,6 +24,7 @@ int main()
 {
 	PinB5::setOutput();
 
+	Uart::init();
 	Uart::setBaudRate<57600>();
 	Uart::start();
 

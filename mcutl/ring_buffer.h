@@ -16,7 +16,7 @@ class RingBuffer
 	volatile IndexType _writeCount;
 
 public:
-	inline RingBuffer() : _readCount(0), _writeCount(0) { }
+	inline void init() { _readCount = _writeCount = 0; }
 
 	inline bool isEmpty() const { return _readCount == _writeCount; }
 	inline bool isFull() const { return !(((_writeCount - _readCount) & mask) ^ mask); }

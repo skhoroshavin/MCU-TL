@@ -19,6 +19,12 @@ template<class Stream,int TxSize = 16,int RxSize = 16> class BufferedStream : pu
 	static RingBuffer<RxSize> _rx;
 	static RingBuffer<TxSize> _tx;
 public:
+	static void init()
+	{
+		_rx.init();
+		_tx.init();
+	}
+
 	static bool sendReady()
 	{
 		if( !_tx.isFull() ) return true;
