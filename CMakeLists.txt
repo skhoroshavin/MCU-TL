@@ -1,10 +1,12 @@
-project(AVRTest)
 cmake_minimum_required(VERSION 2.8)
+
+project(MCUTL)
 add_definitions(-Os -std=c++11)
 
 include_directories(mcutl mcutl/AVR)
 
-set( SRC_LIST
+set( MCUTL
+	upload.sh
 	mcutl/AVR/GPIO.h
 	mcutl/AVR/Timer.h
 	mcutl/AVR/Usart.h
@@ -18,8 +20,8 @@ set( SRC_LIST
 	mcutl/PinList.h
 	mcutl/Registers.h
 	mcutl/RingBuffer.h
-	main.cpp
 )
 
-add_executable(${PROJECT_NAME} ${SRC_LIST})
+add_custom_target(${PROJECT_NAME} SOURCES ${MCUTL})
 
+add_subdirectory(examples)
