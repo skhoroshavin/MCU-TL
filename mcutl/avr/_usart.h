@@ -4,6 +4,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
+#include <mcutl/usart.h>
 #include <mcutl/registers.h>
 
 #define AVR_DEFINE_USART(Num) \

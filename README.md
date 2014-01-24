@@ -17,5 +17,5 @@ TODO
 
 Drivers
   - SPI and SoftSPI
-  - nRF24L01P
+  - nRF24L01+
   - MCP2515

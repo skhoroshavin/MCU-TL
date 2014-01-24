@@ -3,6 +3,8 @@
 
 #include <avr/io.h>
 
+#include <mcutl/ports.h>
+
 #define AVR_DEFINE_PORT(Name) \
 	namespace avr { \
 		DEFINE_IO_REGISTER(Port##Name,PORT##Name,uint8_t) \
@@ -54,6 +56,8 @@ struct AVRPort : public BasePort<uint8_t,Ddr,Port,Pin>
 /////////////////////////////////////////////////////////////////////////
 
 #ifdef __AVR_ATmega328__
+namespace arduino
+{
 	typedef PinC0 A0;
 	typedef PinC1 A1;
 	typedef PinC2 A2;
@@ -75,4 +79,5 @@ struct AVRPort : public BasePort<uint8_t,Ddr,Port,Pin>
 	typedef PinB3 D11;
 	typedef PinB4 D12;
 	typedef PinB5 D13;
+};
 #endif

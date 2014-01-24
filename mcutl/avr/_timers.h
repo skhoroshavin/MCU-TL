@@ -4,6 +4,8 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
+#include <mcutl/timers.h>
+
 namespace timer
 {
 	enum TimerMode

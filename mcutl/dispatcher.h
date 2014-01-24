@@ -85,12 +85,13 @@ template<class TaskList,class Flags,unsigned TimerCount = 4,typename TickType = 
 class StaticDispatcher
 {
 	// Timer
+	typedef typename meta::MakeIndexedList<TaskList>::result IndexedTaskList;
 	typedef SoftTimer<Flags,TimerCount,TickType> Timer;
 	static_assert( TaskList::size <= 8, "Static dispatcher cannot handle more than 8 tasks!" );
 
 	template<typename Task> inline static uint8_t taskFlag()
 	{
-		return 1 << internal::FindTask<Task,TaskList>::result::index;
+		return 1 << internal::FindTask<Task,IndexedTaskList>::result::index;
 	}
 
 public:
@@ -111,6 +112,6 @@ public:
 
 	static void process()
 	{
-		internal::TaskIterator<Flags,TaskList>::process();
+		internal::TaskIterator<Flags,IndexedTaskList>::process();
 	}
 };

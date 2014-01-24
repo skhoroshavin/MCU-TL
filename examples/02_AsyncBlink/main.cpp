@@ -5,7 +5,7 @@
 
 struct LedOn;
 struct LedOff;
-typedef typename meta::MakeIndexedList<LedOn,LedOff>::result TaskList;
+typedef meta::List<LedOn,LedOff> TaskList;
 
 DEFINE_IO_REGISTER(TaskFlags,GPIOR0,uint8_t)
 typedef StaticDispatcher<TaskList,TaskFlags> Dispatcher;

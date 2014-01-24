@@ -131,5 +131,6 @@ namespace meta
 		static constexpr uint8_t index = Index;
 	};
 	template<typename T,uint8_t I> struct MakeIndexedType { typedef IndexedType<T,I> result; };
-	template<typename... Types> struct MakeIndexedList { typedef typename TransformI<MakeIndexedType,List<Types...>>::result result; };
+	template<class List> struct MakeIndexedList { typedef typename TransformI<MakeIndexedType,List>::result result; };
+
 }
